@@ -11,9 +11,14 @@ This document describes the Pipeline for a Web application written in Java that
 compile with Maven. The backend of this application consists only of a Redis
 database.
 
-The Pipeline infrastructure is independent of the WebApp and can be reused for
-anything else. This document describe both the Pipeline infrastructure and the
-application, and how to reproduce the Pipeline elsewhere.
+The CI/CD infrastructure is independent of the WebApp Pipeline and can be reused
+for anything else. This document describe both the CI/CD infrastructure and the
+application Pipeline, and how to reproduce them elsewhere.
+
+The application Pipeline compile, test and deploy automatically from sources to
+production. To trigger the Pipeline, just commit some code into GitHub. Only
+commits into the 'master' branch lead to a production deployment. Other branches
+are tested on stage but never deployed.
 
 The sources are split in two Git repositories:
 * This repository that contains the infrastructure description and the
@@ -258,9 +263,6 @@ is the most identified improvements for future releases:
   versioning management should be implemented in order to be able, using the
   HTML part of the WebApp, to be able to identify the version in production and
   being able to trace it back to the Git sources easier.
-* Multibranch not yet well managed (containers conflicts between branches).
-  Also, not all branches should induce a production deployment, only 'master'.
-  Other branches should stop after stagging validation.
 * No automatic backups yet. This is not a big issue, since this architecture use
   infrastructure as code and Pipeline as code. However, the Jenkins Home
   contains build history and artifacts that would be valuable to maintain.
