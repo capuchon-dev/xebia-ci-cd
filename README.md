@@ -8,7 +8,7 @@ Docker.
 ## Introduction
 
 This document describes the Pipeline for a Web application written in Java that
-compile with Maven. The backend of this application consists only of a Redis
+compiles with Maven. The backend of this application consists only of a Redis
 database.
 
 The CI/CD infrastructure is independent of the WebApp Pipeline and can be reused
@@ -67,7 +67,7 @@ described [later in this document](#improvements). These choices are:
   applications, whatever their language used). But you will notice that this
   CI/CD infrastructure as code is very small (a Docker container with Jenkins
   and some useful plugins pre-installed).
-* Tomcat is used as the servlet container for the Java application (currently:
+* Tomcat is used as the servlet container for the Java applications (currently:
   Jenkins itself and the Click Count WebApp).
 * Docker used everywhere. Especially, Jenkins itself is described by a
   Dockerfile, but is very simple: only some useful plugins pre-installed, that's
@@ -134,8 +134,14 @@ to be done manually:
 
 ### Example on AWS
 
-Here is an example for AWS standard Linux AMIs (not all details are included,
-it is assumed you know how to use AWS instances):
+For AWS, there is a CloudFormation template in the directory `AWS` of this
+repository. It setups the whole stack, with an EC2 instance, Docker enabled and
+configured, Jenking running in Docker. When the stack runs, go to the next
+chapter to setup Jenkins.
+
+Here is instructions if you don't want to use the template and want to do
+everything by hand. Not all details are included, it is assumed you know how to
+use AWS instances:
 
 * Instantiate an EC2 instance of your choice with the "Amazon Linux AMI". I
   developed the Pipeline with a "t2.micro" instance, this works very well and
@@ -156,7 +162,6 @@ it is assumed you know how to use AWS instances):
   * TCP 22 from 0.0.0.0/0 (HTTP for Click Count app)
   * TCP 8080 from 0.0.0.0/0 (Jenkins)
   * TCP 80 from 0.0.0.0/0 (Click Count Production)
-  * TCP 8088 from 0.0.0.0/0 (Click Count Stage)
   * Add also IPv6 same rules if you want.
 * Launch the instance, wait it is up and running.
 * SSH into the instance as 'ec2-user' and launch Jenkins:
@@ -207,7 +212,7 @@ Linux instance. Open your favorite browser to port 80:
 
 ### Terminate the GitHub setting
 
-The CI/CD is now in place, and everything run, however, if you commit changes
+The CI/CD is now in place, and everything runs, however, if you commit changes
 into the click-count repo, nothing will happen... You have to setup a Webhook
 on GitHub side to make the connection complete between the repository and the
 CI/CD:
@@ -239,13 +244,13 @@ is the most identified improvements for future releases:
   A next step should use real orchestration to deploy the WebApps, and for the
   CI/CD itself. [OpenShift](https://www.openshift.com/) is one of the
   possibilities amongst many others.
-* In this version, Jenkins communicate with the host Docker Engine through the
+* In this version, Jenkins communicates with the host Docker Engine through the
   host docker local socket in order to create "sibling" containers. Note that it
   cause problems on recent versions of Docker for MacOS. This works well on
   Linux however.
 * No Reverse Proxy used, the Tomcat containers are exposed directly to the open
   internet. Again, this is to reach the MVP faster. A next step would be to
-  have a Reverse Proxy in front of Jenkins and in front on the WebApps. And
+  have a Reverse Proxy in front of Jenkins and in front of the WebApps. And
   because the CI/CD and the WebApps should be separated, each host should have
   its own Reverse Proxy for, respectively, Jenkins and the WebApps.
 * No SSL (HTTPS). Everything is HTTP, and yes, the Jenkins password at login
@@ -261,17 +266,14 @@ is the most identified improvements for future releases:
 * Versioning not yet managed. The Pipeline ensure some part of traceability
   between sources and production. However, this is far from perfect. A real
   versioning management should be implemented in order to be able, using the
-  HTML part of the WebApp, to be able to identify the version in production and
-  being able to trace it back to the Git sources easier.
+  HTML part of the WebApp, to identify the version in production and to trace it
+  back to the Git sources easier.
 * No automatic backups yet. This is not a big issue, since this architecture use
   infrastructure as code and Pipeline as code. However, the Jenkins Home
   contains build history and artifacts that would be valuable to maintain.
   Thanks to Jenkins plugins and/or the fact that Jenkins Home is in a Docker
   Volume, this backup process is easy to implement, but is left for a next step
   due to its non critical nature in this case.
-* Not everything is described as code: cloud deployment of the host is currently
-  manual, because simple. Bigger real life CI/CD should have cloud templates
-  (AWS CloudFormation, [Terraform](https://www.terraform.io/), ...).
 
 
 ## Development story
